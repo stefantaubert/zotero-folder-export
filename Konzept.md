@@ -1,7 +1,7 @@
 
 Optionen:
 
-- Inkludiere: Dateien, Notizen, Kollektionen, Einträge
+- Inkludiere: Anhänge, Notizen, Kollektionen, Einträge
 
 ## Python
 
@@ -30,7 +30,7 @@ Optionen:
 - Modus: erste Zeile und bei leeren Notizen (nur Whitespace) den Standardname, immer Standardname
 - Name: Standardname einer Notiz, standardmäßig `note`
 
-### Dateien
+### Anhänge
 
 Jede Datei wird exportiert.
 

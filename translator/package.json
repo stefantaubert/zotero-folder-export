@@ -5,7 +5,7 @@
   "main": "dist/export-json.js",
   "scripts": {
     "start": "tsc --target ES2017 --moduleResolution node 'export-json.ts' --outDir 'dist' && node header.js",
-    "test": "npm start && rm -rf 'layer1' && cp 'dist/export-json.js' /home/user/Zotero/translators/"
+    "test": "npm start && rm -rf 'My Library.json' && cp 'dist/export-json.js' /home/user/Zotero/translators/"
   },
   "repository": {
     "type": "git",
