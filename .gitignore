@@ -129,5 +129,7 @@ dmypy.json
 .pyre/
 
 node_modules/
-layer1/
 dist/
+My Library.json
+package-lock.json
+

@@ -2,11 +2,9 @@ declare const Zotero: any
 declare const OS: any
 // declare const fs: any
 
-function log(msg, src: string = "test") {
-  Zotero.debug(`Folder export: ${src} -> ${msg}`)
+function log(msg: any, src: string): void {
+  Zotero.debug(`Folder export: ${src} -> ${JSON.stringify(msg)}`)
 }
-
-//const fs = require('fs')
 
 interface IDescendent {
   id: number;
@@ -128,21 +126,6 @@ class Exporter {
     }
   }
 
-  private join(...p: string[]) {
-    return p.filter(_ => _).join('/')
-  }
-
-  clean(filename: string): string {
-    const result = filename.replace(/[\x00-\x1F\x7F\/\\:*?"<>|$%]/g, encodeURIComponent);
-    return result;
-  }
-
-  split(filename: string): string[] {
-    const dot = filename.lastIndexOf('.')
-    return (dot < 1 || dot === (filename.length - 1)) ? [filename, ''] : [filename.substring(0, dot), filename.substring(dot)]
-  }
-
-
   public exportItem(item: ITopItem, paths: Record<string, string[]>) {
     switch (item.itemType) {
       case "attachment":
@@ -170,40 +153,14 @@ class Exporter {
         };
         Zotero.write(JSON.stringify(res) + "\n")
 
-        const folder = this.join(...paths[collection]);
-        const itemFolderName = this.clean(item.title);
-        const [folder_base, folder_ext] = this.split(itemFolderName);
-        if (item.attachments.length == 1) {
-          const attachment = item.attachments[0];
-          const fileName = this.clean(attachment.filename)
-          const [file_base, file_ext] = this.split(fileName);
-          const fileHasSameNameAsItem = folder_base === file_base;
-          var fullPath: string;
-          if (fileHasSameNameAsItem) {
-            fullPath = this.join(folder, fileName);
-          }
-          else {
-            fullPath = this.join(folder, folder_base, fileName);
-          }
-
-          log(JSON.stringify(fullPath), "saving")
-          // attachment.saveFile(fullPath, true);
-          //fs.writeFileSync(fullPath, "test");
-          // is more or less required
-          Zotero.write(`${attachment.localPath};${fullPath}\n`)
-          Zotero.write(JSON.stringify(attachment) + "\n")
-        }
-        else {
-          for (let attachment of item.attachments) {
-            const fileName = this.clean(attachment.filename)
-            const fullPath = this.join(folder, folder_base, fileName);
-            log(JSON.stringify(fullPath), "saving")
-            // attachment.saveFile(fullPath, true);
-            //fs.writeFileSync(fullPath, "test");
-            // is more or less required
-            Zotero.write(`${attachment.localPath};${fullPath}\n`)
-            Zotero.write(JSON.stringify(attachment) + "\n")
-          }
+        for (let attachment of item.attachments) {
+          const res: IExportAttachment = {
+            type: "attachment",
+            path: attachment.localPath,
+            structure: paths[collection],
+            item: item.title,
+          };
+          Zotero.write(JSON.stringify(res) + "\n")
         }
       }
     }
@@ -214,13 +171,13 @@ class Exporter {
     Zotero.debug(item);
     for (let collection of item.collections) {
       if (collection in paths) {
-        const folder = this.join(...paths[collection]);
-        const fileName = this.clean(item.filename)
-        const fullPath = this.join(folder, fileName);
-        log(JSON.stringify(fullPath), "saving")
-        // item.saveFile(fullPath, true);
-        Zotero.write(`${item.localPath};${fullPath}\n`)
-        Zotero.write(JSON.stringify(item) + "\n")
+        const res: IExportAttachment = {
+          type: "attachment",
+          path: item.localPath,
+          structure: paths[collection],
+          item: null,
+        };
+        Zotero.write(JSON.stringify(res) + "\n")
       }
     }
   }
@@ -242,8 +199,6 @@ class Exporter {
 }
 
 function doExport() {
-  if (!Zotero.getOption('exportFileData')) throw new Error('File Hierarchy needs "Export File Data" to be on')
-
   const exporter = new Exporter();
 
   let finalPaths: Record<string, string[]> = {}

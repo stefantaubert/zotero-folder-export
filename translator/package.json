@@ -1,5 +1,5 @@
 {
-  "name": "zotero-file-hierarchy",
+  "name": "export-json",
   "version": "1.0.0",
   "description": "Export JSON",
   "main": "dist/export-json.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/retorquere/zotero-file-hierarchy.git"
+    "url": "git+https://...export-json.git"
   },
   "author": "Stefan Taubert",
   "license": "MIT",

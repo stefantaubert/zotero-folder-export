@@ -10,18 +10,19 @@ const header = JSON.stringify({
   'minVersion': '4.0.27',
   'maxVersion': '',
   'configOptions': {
-		'getCollections': true
+		'getCollections': true,
   },
   'displayOptions': {
     'Include Collections': true,
     'Include Items': true,
     'Include Attachments': true,
-    'Include Notes': true
+    'Include Notes': true,
+		"exportCharset": "UTF-8xBOM",
   },
   'translatorType': 2,
   'browserSupport': 'gcsv',
   'priority': 100,
-  'inRepository': false,
+  'inRepository': true,
   'lastUpdated': fs.statSync('export-json.ts').mtime.toISOString().replace('T', ' ').replace(/\..*/, ''),
 }, null, 2)
 
