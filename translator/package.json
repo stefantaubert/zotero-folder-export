@@ -1,0 +1,24 @@
+{
+  "name": "zotero-file-hierarchy",
+  "version": "1.0.0",
+  "description": "Export JSON",
+  "main": "dist/export-json.js",
+  "scripts": {
+    "start": "tsc --target ES2017 --moduleResolution node 'export-json.ts' --outDir 'dist' && node header.js",
+    "test": "npm start && rm -rf 'layer1' && cp 'dist/export-json.js' /home/user/Zotero/translators/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/retorquere/zotero-file-hierarchy.git"
+  },
+  "author": "Stefan Taubert",
+  "license": "MIT",
+  "bugs": {
+    "url": ".../issues"
+  },
+  "homepage": "...#readme",
+  "dependencies": {
+    "@types/node": "^17.0.17",
+    "typescript": "^4.5.4"
+  }
+}
