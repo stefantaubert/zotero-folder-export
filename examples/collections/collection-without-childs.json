@@ -1,0 +1,25 @@
+{
+    "primary": {
+        "collectionID": 5,
+        "libraryID": 1,
+        "key": "79TM2QHT"
+    },
+    "fields": {
+        "name": "layer3",
+        "parentKey": "ISL39N6F"
+    },
+    "childCollections": [],
+    "childItems": [
+        4
+    ],
+    "descendents": [
+        {
+            "id": 4,
+            "key": "EY2QQTP6",
+            "type": "item",
+            "parent": 5
+        }
+    ],
+    "id": 5,
+    "name": "layer3"
+}

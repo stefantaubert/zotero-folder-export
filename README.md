@@ -58,3 +58,93 @@ chrome/content/zotero/xpcom/attachments.js:3047
 			return 'linked_url';
 		case this.LINK_MODE_EMBEDDED_IMAGE:
 			return 'embedded_image';
+
+
+## Dev
+
+https://www.zotero.org/support/dev/translators/coding
+
+npm i @types/node
+
+/opt/Zotero_linux-x86_64/zotero
+after each start: Help -> Debug Output Logging -> Enable
+
+http://web.archive.org/web/20210531173818/https://developer.mozilla.org/en-US/docs/Mozilla/JavaScript_code_modules/OSFile.jsm
+
+Symbolic Links:
+http://web.archive.org/web/20150426182832/https://developer.mozilla.org/en-US/docs/Mozilla/JavaScript_code_modules/OSFile.jsm/OS.File_for_the_main_thread#OS.File.stat
+
+https://firefox-source-docs.mozilla.org/dom/ioutils_migration.html
+```
+For various reasons (complexity, safety, availability of underlying system calls, usefulness, etc.) the following OS.File methods have no analogue in IOUtils. They also will not be implemented.
+
+    void unixSymlink(in string targetPath, in string createPath)
+    ...
+```
+
+Zotero.write() -> writes a line
+chrome/content/zotero/xpcom/translation/translate_firefox.js:774
+
+if header is changed, zotero need to be restarted
+
+## Concept
+
+Export Notes, Attachments as JSON in one Line
+
+Then python script that creates hardlinks of all files in folder
+
+Export:
+
+```json
+{
+    "collections": IExportCollection[],
+    "notes": IExportNotes[],
+    "items": IExportItems[],
+    "attachments": IExportAttachments[],
+}
+```
+
+Attachment:
+
+```json
+{
+    // collection structure
+    "structure": string[],
+    // path to file
+    "path": string,
+    // parent item if one exist
+    "item?": string,
+}
+```
+
+Note:
+
+```json
+{
+    // collection structure
+    "structure": string[],
+    // content of note
+    "content": string,
+    // parent item if one exist
+    "item?": string,
+}
+```
+
+Item:
+
+```json
+{
+    // collection structure
+    "structure": string[],
+    "item": string,
+}
+```
+
+Collection:
+
+```json
+{
+    // collection structure
+    "structure": string[],
+}
+```

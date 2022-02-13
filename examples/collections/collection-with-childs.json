@@ -1,0 +1,57 @@
+{
+    "primary": {
+        "collectionID": 4,
+        "libraryID": 1,
+        "key": "ISL39N6F"
+    },
+    "fields": {
+        "name": "layer2",
+        "parentKey": "JGJI8GUX"
+    },
+    "childCollections": [
+        5
+    ],
+    "childItems": [
+        2,
+        5,
+        7
+    ],
+    "descendents": [
+        {
+            "id": 5,
+            "name": "layer3",
+            "key": "79TM2QHT",
+            "type": "collection",
+            "level": 1,
+            "parent": 4,
+            "children": [
+                {
+                    "id": 4,
+                    "key": "EY2QQTP6",
+                    "type": "item",
+                    "parent": 5
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "key": "52BIL4P9",
+            "type": "item",
+            "parent": 4
+        },
+        {
+            "id": 5,
+            "key": "HSDNK7BR",
+            "type": "item",
+            "parent": 4
+        },
+        {
+            "id": 7,
+            "key": "KJYHHZ9N",
+            "type": "item",
+            "parent": 4
+        }
+    ],
+    "id": 4,
+    "name": "layer2"
+}
