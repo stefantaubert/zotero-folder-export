@@ -135,3 +135,7 @@ package-lock.json
 
 done.md
 Konzept.md
+
+playground/
+export.json
+.vscode/

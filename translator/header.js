@@ -13,10 +13,6 @@ const header = JSON.stringify({
 		'getCollections': true,
   },
   'displayOptions': {
-    'Include Collections': true,
-    'Include Items': true,
-    'Include Attachments': true,
-    'Include Notes': true,
 		"exportCharset": "UTF-8xBOM",
   },
   'translatorType': 2,

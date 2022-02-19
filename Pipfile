@@ -1,0 +1,24 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+tqdm = "*"
+ordered-set = "*"
+colander = "*"
+marshmallow-dataclass = {extras = ["enum", "union"], version = "*"}
+
+[dev-packages]
+zotero_folder_export = {editable = true, path = "."}
+autopep8 = "*"
+pylint = "*"
+pycodestyle = "*"
+isort = "*"
+pipenv-setup = "*"
+rope = "*"
+pytest = "*"
+pyinstaller = "*"
+
+[requires]
+python_version = "3.8"
