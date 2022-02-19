@@ -1,3 +1,5 @@
+import re
+from pathlib import Path
 from typing import Dict, Generator, Iterable, List, Tuple
 
 from zotero_json_parsing import ZoteroData
@@ -8,6 +10,24 @@ def process(data: ZoteroData) -> None:
   paths = get_collections_paths(data.collections)
   paths = dict(paths)
   print(paths)
+  collection_folders = set(get_collection_folders(paths.values()))
+  print(collection_folders)
+
+
+def get_collection_folders(paths: Iterable[Tuple[str, ...]]) -> Generator[Path, None, None]:
+  for path in paths:
+    yield get_collection_folder(path)
+
+
+def get_collection_folder(path: Tuple[str, ...]) -> Path:
+  clean_parts = list(clean_name(part) for part in path)
+  path = Path(*clean_parts)
+  return path
+
+
+def clean_name(name: str) -> str:
+  result = re.sub(r'[^\w\d\-_\. ]', '_', name)
+  return result
 
 
 def get_collections_paths(collections: Iterable[Collection]) -> Generator[Tuple[str, Tuple[str, ...]], None, None]:
