@@ -24,9 +24,9 @@ class Collection():
 
   fields: Fields
 
-  childCollections: Union[Dict[str, str], List[int]] = dataclasses.field(default_factory=lambda: [])
+  childCollections: Union[Dict[str, str], List[int]] = dataclasses.field(default_factory=list)
 
-  childItems: List[int] = dataclasses.field(default_factory=lambda: [])
+  childItems: List[int] = dataclasses.field(default_factory=list)
 
   @dataclass()
   class Descendent():
@@ -36,9 +36,14 @@ class Collection():
     parent: int
     level: Optional[int]
     name: Optional[str]
-    children: List["Descendent"] = dataclasses.field(default_factory=lambda: [])
+    children: List["Descendent"] = dataclasses.field(default_factory=list)
 
-  descendents: List[Descendent] = dataclasses.field(default_factory=lambda: [])
+  descendents: List[Descendent] = dataclasses.field(default_factory=list)
+
+
+@dataclass()
+class Tag():
+  tag: str
 
 
 @dataclass()
@@ -68,14 +73,11 @@ class Item():
   #   lastName: str
   #   creatorType: str
 
-  # creators: List[Creator] = dataclasses.field(default_factory=lambda: [])
-  @dataclass()
-  class Tag():
-    tag: str
+  # creators: List[Creator] = dataclasses.field(default_factory=list)
 
   tags: List[Tag] = dataclasses.field(default_factory=list)
   collections: List[str] = dataclasses.field(default_factory=list)
-  relations: Dict[str, List[str]] = dataclasses.field(default_factory=lambda: [])
+  relations: Dict[str, List[str]] = dataclasses.field(default_factory=list)
 
   @dataclass()
   class Attachment():
@@ -85,22 +87,24 @@ class Item():
     itemType: str
     linkMode: str
     url: Optional[str]
+    tags: List[Tag] = dataclasses.field(default_factory=list)
 
-  attachments: List[Attachment] = dataclasses.field(default_factory=lambda: [])
+  attachments: List[Attachment] = dataclasses.field(default_factory=list)
 
   @dataclass()
   class Note():
     key: str
     uri: str
     note: str
+    tags: List[Tag] = dataclasses.field(default_factory=list)
 
-  notes: List[Note] = dataclasses.field(default_factory=lambda: [])
+  notes: List[Note] = dataclasses.field(default_factory=list)
 
 
 @dataclass()
 class Data():
 
-  collections: List[Collection]  # = dataclasses.field(default_factory=lambda: [])
+  collections: List[Collection]  # = dataclasses.field(default_factory=list)
 
-  items: List[Item]  # = dataclasses.field(default_factory=lambda: [])
+  items: List[Item]  # = dataclasses.field(default_factory=list)
   # Schema: ClassVar[Type[Schema]] = Schema  # For the type checker

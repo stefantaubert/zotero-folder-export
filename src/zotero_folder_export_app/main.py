@@ -1,7 +1,7 @@
-from pathlib import Path
 import re
+from pathlib import Path
 
-from zotero_folder_export_core.main import build_library
+from zotero_folder_export_core import build_library
 from zotero_json_parsing import parse_zotero_json_tqdm
 
 
