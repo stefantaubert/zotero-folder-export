@@ -1,9 +1,15 @@
 from pathlib import Path
+import re
 
-from zotero_folder_export_core.main import process
+from zotero_folder_export_core.main import build_library
 from zotero_json_parsing import parse_zotero_json_tqdm
 
 
 def main(path: Path, encoding: str = 'utf-8'):
   data = parse_zotero_json_tqdm(path, encoding)
-  process(data)
+  library = build_library(data)
+
+
+def clean_name(name: str) -> str:
+  result = re.sub(r'[^\w\d\-_\. ]', '_', name)
+  return result

@@ -1,127 +1,187 @@
 import re
 from collections import OrderedDict
 from dataclasses import dataclass
+from logging import getLogger
 from pathlib import Path
-from typing import Dict, Generator, Iterable, List
+from typing import Dict, Generator, Iterable, List, Optional
 from typing import OrderedDict as OrderedDictType
 from typing import Tuple
 
-from zotero_json_parsing import Collection, Item, ZoteroData
+from zotero_json_parsing import Collection as ZoteroCollection
+from zotero_json_parsing import Data as ZoteroData
+from zotero_json_parsing import Item as ZoteroItem
+
+Url = str
 
 
 @dataclass()
-class ExportWebpage():
+class Entry():
+  pass
+
+
+@dataclass()
+class NonItem(Entry):
+  pass
+
+
+@dataclass()
+class LinkedWebsite(NonItem):
   title: str
-  url: str
-  # True, if the webpage was linked
-  linked: bool
+  url: Url
 
 
 @dataclass()
-class ExportNote():
-  # contains the HTML-content of the note
+class LinkedFile(NonItem):
+  title: str
+  path: Path
+
+
+@dataclass()
+class Note(NonItem):
   content: str
 
-
-@dataclass()
-class ExportFolder():
-  # represent folders inside Zotero directories
-
-  # contains the path to the folder
-  path: Path
+  # to distinguish two different notes with the same content
+  identifier: str
 
 
 @dataclass()
-class ExportFile():
-  # True, if the file was a linked file
-  linked: bool
-
-  # True, if the file was found in the Zotero directory but was not present in Zotero
-  hidden: bool
-
-  # contains the path to the file
-  path: Path
-
-
-class ExportAttachment():
+class ImportedFile(NonItem):
+  # imported file or webpage (html -> Snapshot)
   title: str
-
-  files: List[ExportFile]
-  folders: List[ExportFolder]
-
-  webpages: List[ExportWebpage]
+  path: Path
+  url: Optional[Url]
 
 
 @dataclass()
-class ExportItem():
+class Item(Entry):
   title: str
-  attachments: List[ExportAttachment]
-
-  # notes without items
-  notes: List[ExportNote]
-
-  # webpages without items
-  webpages: List[ExportWebpage]
+  url: Optional[Url]
+  entries: List[NonItem]
 
 
 @dataclass()
-class ExportCollection():
-  structure: Tuple[str, ...]
-  items: List[ExportItem]
-
-  # notes without items
-  notes: List[ExportNote]
-
-
-def process(data: ZoteroData) -> None:
-  paths = get_collections_paths(data.collections)
-  paths = ((key, get_collection_folder(path)) for key, path in paths)
-  paths = OrderedDict(paths)
-  print(paths)
+class Collection():
+  name: str
+  collections: List['Collection']
+  items: List[Item]
+  entries: List[NonItem]
 
 
-def get_items(items: Iterable[Item]):
-  for item in items:
-    is_from_item = item.parentItem is not None
-    if is_from_item:
-      pass
-    else:
-      pass
-
-    if item.itemType == "attachment":
-      pass
+@dataclass()
+class Unfiled():
+  items: List[Item]
+  entries: List[NonItem]
 
 
-def get_collection_folders(paths: Iterable[Tuple[str, ...]]) -> Generator[Path, None, None]:
-  for path in paths:
-    yield get_collection_folder(path)
+@dataclass()
+class Tagged():
+  items: Dict[str, List[Item]]
+  entries: Dict[str, List[NonItem]]
 
 
-def get_collection_folder(path: Tuple[str, ...]) -> Path:
-  clean_parts = list(clean_name(part) for part in path)
-  path = Path(*clean_parts)
-  return path
+@dataclass()
+class Library():
+  collections: List[Collection]
+  unfiled: Unfiled
+  tagged: Tagged
 
 
-def clean_name(name: str) -> str:
-  result = re.sub(r'[^\w\d\-_\. ]', '_', name)
+def build_library(data: ZoteroData) -> Library:
+  collections = []
+  collection_dict = dict(add_collections(data.collections, collections))
+
+  unfiled = Unfiled([], [])
+  tagged = Tagged({}, {})
+
+  add_items(data.items, collection_dict, unfiled, tagged)
+
+  result = Library(collections, unfiled, tagged)
   return result
 
 
-def get_collections_paths(collections: Iterable[Collection]) -> Generator[Tuple[str, Tuple[str, ...]], None, None]:
-  for collection in collections:
-    yield from get_collection_paths(collection, path=[collection.fields.name])
+def add_items(zotero_items: Iterable[ZoteroItem], collection_dict: Dict[str, Collection], unfiled: Unfiled, tagged: Tagged) -> None:
+  for zotero_item in zotero_items:
+    collection_keys = set(zotero_item.collections).intersection(collection_dict.keys())
+
+    if zotero_item.itemType in {"attachment", "note"}:
+      entry: NonItem
+      if zotero_item.itemType == "attachment":
+        entry = get_entry_from_item(zotero_item)
+      else:
+        entry = Note(zotero_item.note, zotero_item.uri)
+
+      for collection_key in collection_keys:
+        collection_dict[collection_key].entries.append(entry)
+      if len(collection_keys) == 0:
+        unfiled.entries.append(entry)
+
+      for tag in set(zotero_item.tags):
+        if tag not in tagged.entries:
+          tagged.entries[tag] = []
+        tagged.entries[tag].append(entry)
+
+    else:
+      item = Item(zotero_item.title, zotero_item.url, [])
+      for zotero_attachment in zotero_item.attachments:
+        attachment = get_entry_from_attachment(zotero_attachment)
+        if attachment is not None:
+          item.entries.append(attachment)
+      for zotero_note in zotero_item.notes:
+        note = Note(zotero_note.note, zotero_item.uri)
+        item.entries.append(note)
+
+      for collection_key in collection_keys:
+        collection_dict[collection_key].items.append(item)
+      if len(collection_keys) == 0:
+        unfiled.items.append(item)
+
+      for tag in set(zotero_item.tags):
+        if tag not in tagged.items:
+          tagged.items[tag] = []
+        tagged.items[tag].append(item)
 
 
-def get_collection_paths(collection: Collection, path: List[str]) -> Generator[Tuple[str, Tuple[str, ...]], None, None]:
-  for descendent in collection.descendents:
-    yield from get_descendent_paths(descendent, path)
+def get_entry_from_item(item: ZoteroItem) -> Optional[Item]:
+  return get_entry(item.linkMode, item.title, item.localPath, item.url)
 
 
-def get_descendent_paths(descendent: Collection.Descendent, path: List[str]) -> Generator[Tuple[str, Tuple[str, ...]], None, None]:
+def get_entry_from_attachment(attachment: ZoteroItem.Attachment) -> Optional[NonItem]:
+  return get_entry(attachment.linkMode, attachment.title, attachment.localPath, attachment.url)
+
+
+def get_entry(link_mode: str, title: Optional[str], path: Optional[Path], url: Optional[Url]) -> Optional[NonItem]:
+  entry = None
+  if link_mode in {"imported_file", "imported_url"}:
+    entry = ImportedFile(title, path, url)
+  elif link_mode == "linked_file":
+    entry = LinkedFile(title, path)
+  elif link_mode == "linked_url":
+    entry = LinkedWebsite(title, url)
+  elif link_mode == "embedded_image":
+    logger = getLogger(__name__)
+    logger.error("Embedded images are not supported! Entry ignored.")
+  elif link_mode is None:
+    logger = getLogger(__name__)
+    logger.error("Property linkMode is missing! Entry ignored.")
+  else:
+    logger = getLogger(__name__)
+    logger.error(f"Invalid linkMode '{link_mode}'! Entry ignored.")
+  return entry
+
+
+def add_collections(zotero_collections: Iterable[ZoteroCollection], collections: List[Collection]) -> Generator[Tuple[str, Collection], None, None]:
+  for zotero_collection in zotero_collections:
+    collection = Collection(zotero_collection.fields.name, [], [], [])
+    collections.append(collection)
+    yield zotero_collection.primary.key, collection
+    for descendent in zotero_collection.descendents:
+      yield from add_subcollections_from_descendents(descendent, collection)
+
+
+def add_subcollections_from_descendents(descendent: ZoteroCollection.Descendent, parent: Collection) -> Generator[Tuple[str, Collection], None, None]:
   if descendent.type == "collection":
-    new_path = path.copy()
-    new_path.append(descendent.name)
-    yield descendent.key, tuple(new_path)
+    collection = Collection(descendent.name, [], [], [])
+    parent.collections.append(collection)
+    yield descendent.key, collection
     for child in descendent.children:
-      yield from get_descendent_paths(child, new_path)
+      yield from add_subcollections_from_descendents(child, collection)

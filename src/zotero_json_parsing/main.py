@@ -7,7 +7,7 @@ import marshmallow_dataclass
 from marshmallow import EXCLUDE, Schema
 from tqdm import tqdm
 
-from zotero_json_parsing.zotero_data import Collection, Item, ZoteroData
+from zotero_json_parsing.zotero_data import Collection, Item, Data
 
 
 def parse_json(path: Path, encoding: str) -> Dict:
@@ -22,16 +22,16 @@ class BaseSchema(Schema):
     unknown = EXCLUDE
 
 
-def parse_zotero_json(path: Path, encoding: str = 'utf-8') -> ZoteroData:
-  data_schema = marshmallow_dataclass.class_schema(ZoteroData, BaseSchema)
+def parse_zotero_json(path: Path, encoding: str = 'utf-8') -> Data:
+  data_schema = marshmallow_dataclass.class_schema(Data, BaseSchema)
   schema_instance = data_schema()
   json_content = parse_json(path, encoding)
   res = schema_instance.load(json_content)
-  res = cast(ZoteroData, res)
+  res = cast(Data, res)
   return res
 
 
-def parse_zotero_json_tqdm(path: Path, encoding: str = 'utf-8') -> ZoteroData:
+def parse_zotero_json_tqdm(path: Path, encoding: str = 'utf-8') -> Data:
   logger = getLogger(__name__)
   logger.info("Reading json...")
   json_content = parse_json(path, encoding)
@@ -48,5 +48,5 @@ def parse_zotero_json_tqdm(path: Path, encoding: str = 'utf-8') -> ZoteroData:
   collections: List = json_content["collections"]
   zotero_collections = schema_instance.load(tqdm(collections), many=True)
 
-  res = ZoteroData(zotero_collections, zotero_items)
+  res = Data(zotero_collections, zotero_items)
   return res

@@ -1,7 +1,7 @@
 
 import dataclasses
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Set, Union
 
 
 @dataclass()
@@ -45,13 +45,14 @@ class Collection():
 class Item():
   version: int
   itemType: str
-  #title: str
+  title: Optional[str]
   #contentType: str
   #charset: str
   #filename: str
   #dataAdded: Optional[str]
   #dataModified: str
   uri: str
+  url: Optional[str]
   linkMode: Optional[str]
   localPath: Optional[str]
   note: Optional[str]
@@ -68,29 +69,36 @@ class Item():
   #   creatorType: str
 
   # creators: List[Creator] = dataclasses.field(default_factory=lambda: [])
-  tags: Union[Dict[str, str], List[str]] = dataclasses.field(default_factory=lambda: [])
-  collections: List[str] = dataclasses.field(default_factory=lambda: [])
-  relations: Union[Dict[str, str], List[str]] = dataclasses.field(default_factory=lambda: [])
+  @dataclass()
+  class Tag():
+    tag: str
+
+  tags: List[Tag] = dataclasses.field(default_factory=list)
+  collections: List[str] = dataclasses.field(default_factory=list)
+  relations: Dict[str, List[str]] = dataclasses.field(default_factory=lambda: [])
 
   @dataclass()
   class Attachment():
     title: Optional[str]
     filename: Optional[str]
     localPath: Optional[str]
+    itemType: str
+    linkMode: str
+    url: Optional[str]
 
   attachments: List[Attachment] = dataclasses.field(default_factory=lambda: [])
 
   @dataclass()
   class Note():
-    title: Optional[str]
-    filename: Optional[str]
-    localPath: Optional[str]
+    key: str
+    uri: str
+    note: str
 
   notes: List[Note] = dataclasses.field(default_factory=lambda: [])
 
 
 @dataclass()
-class ZoteroData():
+class Data():
 
   collections: List[Collection]  # = dataclasses.field(default_factory=lambda: [])
 
