@@ -55,6 +55,7 @@ class Item():
   linkMode: Optional[str]
   localPath: Optional[str]
   note: Optional[str]
+  parentItem: Optional[str]
 
   #language: str
   #libraryCatalog: str
